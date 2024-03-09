@@ -1,7 +1,7 @@
 <template>
   <v-card>
     <v-card-title>
-      hihihi
+      hihihi - {{count}}
     </v-card-title>
     <v-card-text>
       <v-textarea v-model="text" />
@@ -13,14 +13,24 @@
       <v-btn @click="read">
         read
       </v-btn>
+      <v-btn @click="statCnt">
+        count
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
 <script>
+import { mapMutations } from 'vuex'
+
 export default {
   data() {
     return {
       text: 'wwww'
+    }
+  },
+  computed: {
+    count () {
+      return this.$store.state.global.counter
     }
   },
   methods: {
@@ -47,6 +57,9 @@ export default {
       } catch (e) {
         await this.$dialog.notify.error(e.message)
       }
+    },
+    async statCnt() {
+      this.$store.commit('global/increment');
     }
   }
 }

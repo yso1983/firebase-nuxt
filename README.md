@@ -52,3 +52,8 @@
     ```bash
     $ yarn firebase:deploy
     ```
+
+    ```pinia
+    https://pinia.vuejs.kr/ssr/nuxt
+    https://stack94.tistory.com/entry/Nuxt3-Nuxt3%EC%97%90%EC%84%9C-Pinia-%EC%84%A4%EC%B9%98%ED%95%98%EA%B3%A0-%EC%82%AC%EC%9A%A9%ED%95%B4%EB%B3%B4%EC%9E%90
+    ```

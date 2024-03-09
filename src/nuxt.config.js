@@ -38,9 +38,12 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios',
-    'vuetify-dialog/nuxt',
+    '@nuxtjs/axios'
   ],
+
+  imports: {
+    dirs: ['./stores']
+  },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
@@ -76,6 +79,5 @@ export default {
     FIREBASE_APIKEY: process.env.FIREBASE_APIKEY,
     FIREBASE_AUTHDOMAIN: process.env.FIREBASE_AUTHDOMAIN,
     FIREBASE_PROJECTID: process.env.FIREBASE_PROJECTID,
-    abcd: 1234
   }
 }
