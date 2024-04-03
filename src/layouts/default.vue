@@ -26,20 +26,20 @@
     </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
+      <!-- <v-btn icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn icon @click.stop="clipped = !clipped">
+      </v-btn> -->
+      <!-- <v-btn icon @click.stop="clipped = !clipped">
         <v-icon>mdi-application</v-icon>
-      </v-btn>
+      </v-btn> 
       <v-btn icon @click.stop="fixed = !fixed">
         <v-icon>mdi-minus</v-icon>
-      </v-btn>
+      </v-btn>-->
       <v-toolbar-title>{{ title }}</v-toolbar-title>
       <v-spacer />
-      <v-btn icon @click.stop="rightDrawer = !rightDrawer">
+      <!-- <v-btn icon @click.stop="rightDrawer = !rightDrawer">
         <v-icon>mdi-menu</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-app-bar>
     <v-main>
       <v-container>
@@ -72,20 +72,32 @@ export default {
       fixed: false,
       items: [
         {
-          icon: 'mdi-apps',
-          title: 'Welcome',
+          icon: 'mdi-pencil-box-outline',
+          title: '주문',
+          name: 'index',
           to: '/',
         },
-        // {
-        //   icon: 'mdi-chart-bubble',
-        //   title: 'Inspire',
-        //   to: '/inspire',
-        // },
+        {
+          icon: 'mdi-coffee-outline',
+          title: '메뉴',
+          name: 'item',
+          to: '/item',
+        },
+        {
+          icon: 'mdi-account',
+          title: '맴버',
+          name: 'user',
+          to: '/user',
+        },
       ],
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: '주문',
+    }
+  },
+  computed: {
+    title() {
+      return this.items.find(i => i.name == this.$route.name)?.title;
     }
   },
 }
