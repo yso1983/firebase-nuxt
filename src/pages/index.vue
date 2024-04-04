@@ -9,29 +9,39 @@
     hide-default-footer
     hide-default-header
     :custom-sort="customSort"
+    disable-pagination
   >
     <template v-slot:item.actions="{ item, index}">
       <v-select
+        :ref="`selRef${item.id}`"
         v-model="selItemUsers[item.id]"
         item-text="name"
         item-value="id"
         :items="selUsers"
-        label="메뉴를 선택하세요."
         prepend-icon="mdi-text-account"
-        :menu-props="{ maxHeight: '350'}"
+        :menu-props="{maxHeight: '400', overflowY: true}"
+        chips
+        :label="item.name"
         multiple
-        full-width
-        dense
-        solo
+        outlined
         hide-details
+        dense
         @change="changeVal(`${item.id}`, $event)"
+        @click.prevent="selClick(`${item.id}`)"
+        class="my-3"
+        item-disabled="disable"
       >
+        <template v-slot:prepend-item>
+          <div class="text-center py-2" style="background-color: #263238">
+            {{item.name}}
+          </div>
+        </template>
         <template v-slot:item="{ parent, active, item, attrs, on }">
-          <v-list-item v-on="on" v-bind="attrs" #default="{ active }">
+          <v-list-item v-on="on" v-bind="attrs" #default="{ active }" style="background-color: #424242"  :disable="!active && !item.menu">
             <v-list-item-action>
               <v-checkbox :input-value="active"></v-checkbox>
             </v-list-item-action>
-            <v-list-item-content>
+            <v-list-item-content light>
               <v-list-item-title>
                 <v-row no-gutters align="center">
                   <span>{{ item.name, parent.value }}</span>
@@ -43,7 +53,7 @@
           </v-list-item>
         </template>
         <template v-slot:selection="{ parent, item, index }">
-          <v-chip v-if="index === 0">
+          <v-chip small v-if="index === 0">
             <span>{{ item.name }}</span>
           </v-chip>
           <span
@@ -52,6 +62,13 @@
           >
             (외 +{{ parent.value?.length - 1 }}) = 총{{parent.value?.length}}
           </span>
+        </template>
+        <template v-slot:append-item>
+          <div class="text-center py-2 mb-2" style="background-color: #424242" @click.stop>
+            <v-btn color="primary" @click="closeSel(`selRef${item.id}`)">
+              닫기
+            </v-btn>
+          </div>
         </template>
       </v-select>
     </template>
@@ -82,7 +99,7 @@
     open-on-click
   >
     <template v-slot:prepend="{ item, open }">
-      <v-icon v-if="!item.children" :color="item.gender == 'F' ? 'pink' : 'primary'">
+      <v-icon v-if="!item.children" :color="item.gender == 'F' ? 'pink lighten-3' : 'primary'">
         mdi-account
       </v-icon>
       <v-icon v-else> 
@@ -143,20 +160,20 @@
       dialogDelete: false,
       headers: [
         // { value: 'id', text: 'id' },
-        {
-          text: '메뉴명',
-          align: 'start',
-          //sortable: false,
-          value: 'name',
-          class: 'text-left'
-        },
-        { text: '수정/삭제', value: 'actions', sortable: false,width: '150px', },
+        // {
+        //   text: '메뉴명',
+        //   align: 'start',
+        //   //sortable: false,
+        //   value: 'name',
+        //   class: 'text-left'
+        // },
+        { text: '선택', value: 'actions', sortable: false,width: '150px', },
       ],
       menus: [],
       users: [],
+      selClickCnt: 1,
       selUsers: [],
       selItemUsers: {},
-
       initiallyOpen: [],
     }),
 
@@ -217,6 +234,7 @@
           const r = d.data()
           const user = Object.assign(r)
           user.id = d.id
+          user.disable = false;
           this.users.push(user)
         })
 
@@ -228,11 +246,9 @@
       },
 
       changeVal(val, evt) {
-
         // 다른 메뉴 요소 제거
         Object.keys(this.selItemUsers).forEach(key => {
           if(val != key) {
-            console.log("key", key)
             this.selItemUsers[key] = this.selItemUsers[key]?.filter(e => !evt.includes(e))
           }
         });
@@ -253,6 +269,25 @@
         });
       },
 
+      selClick(menuId) {
+        // 이벤트 2번 발생하므로 한번한 처리하도록 ..
+        if(this.selClickCnt == 1) {
+          this.selUsers.forEach(user => {
+            if(user.menu) {
+              user.disable = user.menu.id != menuId;
+            }
+          });
+          this.selClickCnt++;
+        } else {
+          this.selClickCnt = 1;
+        }
+      },
+
+      closeSel(muneId) {
+        //this.$refs[muneId]?.$el.click()
+        this.$refs[muneId]?.blur()
+      },
+
       getMenuName(item) {
         let name = '';
         if(item.menu) {
@@ -268,7 +303,6 @@
       },
 
       delItem(item) {
-        console.log(item)
         if(item.menu) {
           this.selItemUsers[item.menu.id] = this.selItemUsers[item.menu.id]?.filter(e => item.id != e)
           let user = this.selUsers.find(u => u.id === item.id);
@@ -300,20 +334,3 @@
     },
   }
 </script>
-<style>
-  .v-text-field.v-text-field--enclosed .v-text-field__details { margin-bottom: 0px;}
-  .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages { min-height: 0px;}
-  .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages.theme--dark { min-height: 0px;}
-
-  .v-data-table__mobile-row {width: 100%;}
-  .v-data-table__mobile-row div:first-child { text-align: left;}
-  .v-data-table__mobile-row__cell {width: 100%;}
-  .v-data-table__mobile-row__cell .v-select .v-input__control { min-width: 300px;}
-
-  .v-treeview-node__append .v-text-field__slot input { width:40px;}
-  .v-treeview-node__append .v-text-field__details { margin-bottom: 0px;}
-  .v-treeview-node__append .v-text-field__details .v-messages { min-height: 0px;}
-  .v-treeview-node__append .v-text-field__details .v-messages.theme--dark { min-height: 0px;}
-
-  .centered-input input {text-align: center}
-</style>

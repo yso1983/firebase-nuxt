@@ -10,6 +10,7 @@
     :custom-sort="customSort"
     item-key="id"
     id="itemTbl"
+    disable-pagination
   >
     <template v-slot:top>
       <v-toolbar
@@ -192,7 +193,6 @@
       },
 
       editItem (item) {
-        console.log(item);
     
         this.selectedItem = item
         this.editedItem = Object.assign({}, this.selectedItem)
@@ -237,7 +237,6 @@
       async create() {
         const item = Object.assign(this.editedItem)
         const s = await this.$db.collection('menuItems').add(item)
-        console.log(s)
         this.dialog = false
         await this.read()
       },

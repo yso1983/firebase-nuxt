@@ -102,3 +102,21 @@ export default {
   },
 }
 </script>
+
+<style>
+  .v-text-field.v-text-field--enclosed .v-text-field__details { margin-bottom: 0px;}
+  .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages { min-height: 0px;}
+  .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages.theme--dark { min-height: 0px;}
+
+  .v-data-table__mobile-row {width: 100%;}
+  .v-data-table__mobile-row div:first-child { text-align: left;}
+  .v-data-table__mobile-row__cell {width: 100%;}
+  .v-data-table__mobile-row__cell .v-select .v-input__control { min-width: 300px;}
+
+  .v-treeview-node__append .v-text-field__slot input { width:40px;}
+  .v-treeview-node__append .v-text-field__details { margin-bottom: 0px;}
+  .v-treeview-node__append .v-text-field__details .v-messages { min-height: 0px;}
+  .v-treeview-node__append .v-text-field__details .v-messages.theme--dark { min-height: 0px;}
+
+  .centered-input input {text-align: center}
+</style>

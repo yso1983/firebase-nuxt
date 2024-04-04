@@ -8,6 +8,7 @@
     hide-default-footer
     hide-default-header
     :custom-sort="customSort"
+    disable-pagination
   >
     <template v-slot:top>
       <v-toolbar
@@ -259,7 +260,6 @@
         const user = Object.assign(this.editedUser)
 
         const s = await this.$db.collection('users').add(user)
-        console.log(s)
         this.dialog = false
         await this.read()
       },
