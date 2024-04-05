@@ -220,7 +220,7 @@ export default {
   created () {
     this.getUsers()
     this.getMenus()
-    this.readOrders();
+    this.readOrders()
   },
 
   methods: {
@@ -268,9 +268,9 @@ export default {
             return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
         });
 
-        this.$store.commit('order/setUsers', users);
+        this.$store.commit('order/setUsers', users)
 
-        this.selUsers = JSON.parse(JSON.stringify(users));
+        this.selUsers = JSON.parse(JSON.stringify(users))
       }
     },
 
@@ -283,18 +283,18 @@ export default {
         }
       });
 
-      let menu = this.menus.find(m => m.id === val);
+      let menu = this.menus.find(m => m.id === val)
 
       // 해당 메뉴 초기화 
       this.selUsers.forEach(user => {
-        if(user.menu?.id == val) user.menu = null;
+        if(user.menu?.id == val) user.menu = null
       });
 
       // 유저 메뉴 설정
       evt.forEach(userId => {
-        let user = this.selUsers.find(u => u.id === userId);
+        let user = this.selUsers.find(u => u.id === userId)
         if(user) {
-          user.menu = JSON.parse(JSON.stringify(menu));
+          user.menu = JSON.parse(JSON.stringify(menu))
         }
       });
 
@@ -326,7 +326,7 @@ export default {
       let name = '';
       if(item.menu) {
         name = item.menu?.name;
-        name = name.length > 8 ? name.substring(0, 8) + '...' : name;
+        name = name.length > 8 ? name.substring(0, 8) + '...' : name
       }
       return name;
     },

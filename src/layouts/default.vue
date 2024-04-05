@@ -6,6 +6,7 @@
       :clipped="clipped"
       fixed
       app
+      v-if="isLoginPage"
     >
       <v-list>
         <v-list-item
@@ -24,7 +25,7 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
+    <v-app-bar :clipped-left="clipped" fixed app v-if="isLoginPage">
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <!-- <v-btn icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
@@ -98,7 +99,17 @@ export default {
   computed: {
     title() {
       return this.items.find(i => i.name == this.$route.name)?.title;
+    },
+    isLoginPage() {
+      return this.$route?.name != 'login';
     }
+  },
+  create() {
+    this.$auth().onAuthStateChanged((user) => {
+      if (!user) {
+        this.$router.push({name: 'login'})
+      }
+    })
   },
   mounted() {
     this.$auth().onAuthStateChanged((user) => {
