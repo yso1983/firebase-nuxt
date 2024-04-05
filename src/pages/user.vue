@@ -274,6 +274,8 @@
           this.users.push(user)
         })
 
+        this.$store.commit('order/setUsers', this.users);
+
         this.isLoading = false;
       },
       async update() {

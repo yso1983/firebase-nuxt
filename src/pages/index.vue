@@ -60,7 +60,7 @@
             v-if="index === 1"
             class="grey--text text-caption"
           >
-            (외 +{{ parent.value?.length - 1 }}) = 총{{parent.value?.length}}
+            외 + {{ parent.value?.length - 1 }} 명
           </span>
         </template>
         <template v-slot:append-item>
@@ -152,185 +152,276 @@
 </div>
 </template>
 <script>
-  export default {
-    name:'index',
-    data: () => ({
-      isLoading: true,
-      dialog: false,
-      dialogDelete: false,
-      headers: [
-        // { value: 'id', text: 'id' },
-        // {
-        //   text: '메뉴명',
-        //   align: 'start',
-        //   //sortable: false,
-        //   value: 'name',
-        //   class: 'text-left'
-        // },
-        { text: '선택', value: 'actions', sortable: false,width: '150px', },
-      ],
-      menus: [],
-      users: [],
-      selClickCnt: 1,
-      selUsers: [],
-      selItemUsers: {},
-      initiallyOpen: [],
-    }),
+import { mapGetters } from 'vuex';
 
-    computed: {
-      items () {
-        let items = this.menus;
-        items.forEach(item => {
-          let userIds = this.selItemUsers[item.id];
-          let cnt = 0;
-          if(userIds) {
-            item.children = [];
-            userIds.forEach(userId => {
-              let user = this.selUsers.find(u => u.id === userId);
-              if(user) {
-                item.children.push(JSON.parse(JSON.stringify(user)));
-              }
-              cnt++;
-            });
+export default {
+  name:'index',
+  data: () => ({
+    isLoading: true,
+    dialog: false,
+    dialogDelete: false,
+    headers: [
+      // { value: 'id', text: 'id' },
+      // {
+      //   text: '메뉴명',
+      //   align: 'start',
+      //   //sortable: false,
+      //   value: 'name',
+      //   class: 'text-left'
+      // },
+      { text: '선택', value: 'actions', sortable: false,width: '150px', },
+    ],
+    // menus: [],
+    // users: [],
+    selClickCnt: 1,
+    selUsers: [],
+    selItemUsers: {},
+    initiallyOpen: [],
+    orderId: null,
+    orderDate: null,
+    uploadCompleted: true,
+  }),
 
-            item.cnt = cnt;
-          }
+  computed: {
+    ...mapGetters('order', ['menus', 'users']),
+    items () {
+      let items = JSON.parse(JSON.stringify(this.menus));
+      items.forEach(item => {
+        let userIds = this.selItemUsers[item.id];
+        let cnt = 0;
+        if(userIds) {
+          item.children = [];
+          userIds.forEach(userId => {
+            let user = this.selUsers.find(u => u.id === userId);
+            if(user) {
+              item.children.push(JSON.parse(JSON.stringify(user)));
+            }
+            cnt++;
+          });
 
-          item.totCnt = item.cnt + item.addCnt;
-        });
+          item.cnt = cnt;
+        }
 
-        return items.filter(i => i.cnt > 0);
-      },
+        item.totCnt = item.cnt + item.addCnt;
+      });
+
+      return items.filter(i => i.cnt > 0);
+    },
+  },
+
+  watch: {
+    dialog (val) {
+      val || this.close()
+    },
+    dialogDelete (val) {
+      val || this.closeDelete()
+    },
+  },
+
+  async created () {
+    this.getUsers()
+    await this.getMenus()
+    await this.readOrders();
+  },
+
+  methods: {
+    initialize () {
+      this.selUsers.forEach(user => {
+        user.menu = null;
+      })
+      this.selItemUsers = {}
+      this.getMenus()
     },
 
-    watch: {
-      dialog (val) {
-        val || this.close()
-      },
-      dialogDelete (val) {
-        val || this.closeDelete()
-      },
-    },
+    // async getUsers() {
 
-    created () {
-      this.getUsers()
-      this.read()
-    },
+    //   const s = await this.$db.collection('users').get()
+    //   this.users = []
+    //   s.forEach(d => {
+    //     const r = d.data()
+    //     const user = Object.assign(r)
+    //     user.id = d.id
+    //     user.disable = false;
+    //     this.users.push(user)
+    //   })
 
-    methods: {
-      initialize () {
-        this.selUsers.forEach(user => {
-          user.menu = null;
-        })
-        this.selItemUsers = {}
-        this.read()
-      },
+    //   this.users = this.users.sort((a, b) => {
+    //       return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+    //   });
 
-      async getUsers() {
+    //   this.selUsers = JSON.parse(JSON.stringify(this.users));
+    // },
+    async getUsers() {
 
+      if(!this.users || this.users.length < 1) {
+        
         const s = await this.$db.collection('users').get()
-        this.users = []
+        let users = []
         s.forEach(d => {
           const r = d.data()
           const user = Object.assign(r)
           user.id = d.id
           user.disable = false;
-          this.users.push(user)
+          users.push(user)
         })
 
-        this.users = this.users.sort((a, b) => {
+        users = users.sort((a, b) => {
             return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
         });
 
-        this.selUsers = JSON.parse(JSON.stringify(this.users));
-      },
+        this.$store.commit('order/setUsers', users);
 
-      changeVal(val, evt) {
-        // 다른 메뉴 요소 제거
-        Object.keys(this.selItemUsers).forEach(key => {
-          if(val != key) {
-            this.selItemUsers[key] = this.selItemUsers[key]?.filter(e => !evt.includes(e))
-          }
-        });
+        this.selUsers = JSON.parse(JSON.stringify(users));
+      }
+    },
 
-        let menu = this.menus.find(m => m.id === val);
+    async changeVal(val, evt) {
 
-        // 해당 메뉴 초기화 
+      // 다른 메뉴 요소 제거
+      Object.keys(this.selItemUsers).forEach(key => {
+        if(val != key) {
+          this.selItemUsers[key] = this.selItemUsers[key]?.filter(e => !evt.includes(e))
+        }
+      });
+
+      let menu = this.menus.find(m => m.id === val);
+
+      // 해당 메뉴 초기화 
+      this.selUsers.forEach(user => {
+        if(user.menu?.id == val) user.menu = null;
+      });
+
+      // 유저 메뉴 설정
+      evt.forEach(userId => {
+        let user = this.selUsers.find(u => u.id === userId);
+        if(user) {
+          user.menu = JSON.parse(JSON.stringify(menu));
+        }
+      });
+
+      this.updateOrders();
+    },
+
+    selClick(menuId) {
+      // 이벤트 2번 발생하므로 한번한 처리하도록 ..
+      if(this.selClickCnt == 1) {
         this.selUsers.forEach(user => {
-          if(user.menu?.id == val) user.menu = null;
-        });
-
-        // 유저 메뉴 설정
-        evt.forEach(userId => {
-          let user = this.selUsers.find(u => u.id === userId);
-          if(user) {
-            user.menu = JSON.parse(JSON.stringify(menu));
+          if(user.menu) {
+            user.disable = user.menu.id != menuId;
           }
         });
-      },
+        this.selClickCnt++;
+      } else {
+        this.selClickCnt = 1;
+      }
+    },
 
-      selClick(menuId) {
-        // 이벤트 2번 발생하므로 한번한 처리하도록 ..
-        if(this.selClickCnt == 1) {
-          this.selUsers.forEach(user => {
-            if(user.menu) {
-              user.disable = user.menu.id != menuId;
-            }
-          });
-          this.selClickCnt++;
-        } else {
-          this.selClickCnt = 1;
-        }
-      },
+    closeSel(muneId) {
+      //this.$refs[muneId]?.$el.click()
+      this.$refs[muneId]?.blur()
+    },
 
-      closeSel(muneId) {
-        //this.$refs[muneId]?.$el.click()
-        this.$refs[muneId]?.blur()
-      },
+    getMenuName(item) {
+      let name = '';
+      if(item.menu) {
+        name = item.menu?.name;
+        name = name.length > 8 ? name.substring(0, 8) + '...' : name;
+      }
+      return name;
+    },
 
-      getMenuName(item) {
-        let name = '';
-        if(item.menu) {
-          name = item.menu?.name;
-          name = name.length > 8 ? name.substring(0, 8) + '...' : name;
-        }
-        return name;
-      },
+    addCnt(item, add) {
+      item.addCnt = item.addCnt + add;
+      if(item.addCnt < 0 ) item.addCnt = 0;
+    },
 
-      addCnt(item, add) {
-        item.addCnt = item.addCnt + add;
-        if(item.addCnt < 0 ) item.addCnt = 0;
-      },
+    delItem(item) {
+      if(item.menu) {
+        this.selItemUsers[item.menu.id] = this.selItemUsers[item.menu.id]?.filter(e => item.id != e)
+        let user = this.selUsers.find(u => u.id === item.id);
+        if(user) user.menu = null;
+      }
+    },
 
-      delItem(item) {
-        if(item.menu) {
-          this.selItemUsers[item.menu.id] = this.selItemUsers[item.menu.id]?.filter(e => item.id != e)
-          let user = this.selUsers.find(u => u.id === item.id);
-          if(user) user.menu = null;
-        }
-      },
-
-      async read() {
+    // async getMenus() {
+    //   const s = await this.$db.collection('menuItems').get()
+    //   this.menus = []
+    //   s.forEach(d => {
+    //     const r = d.data()
+    //     const item = Object.assign(r)
+    //     item.id = d.id
+    //     item.children = []
+    //     item.cnt = 0
+    //     item.addCnt = 0
+    //     item.totCnt = 0
+    //     this.menus.push(item)
+    //   })
+    //   this.isLoading = false
+    // },
+    async getMenus() {
+      if(!this.menus || this.menus.length < 1) {
         const s = await this.$db.collection('menuItems').get()
-        this.menus = []
+        let menus = []
         s.forEach(d => {
           const r = d.data()
           const item = Object.assign(r)
           item.id = d.id
-          item.children = [];
-          item.cnt = 0;
-          item.addCnt = 0;
-          item.totCnt = 0;
-          this.menus.push(item)
+          item.children = []
+          item.cnt = 0
+          item.addCnt = 0
+          item.totCnt = 0
+          menus.push(item)
         })
-        this.isLoading = false;
-      },
-      customSort: function(items, index, isDesc) {
-        items.sort((a, b) => {
-            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-        });
-        return items;
+        this.$store.commit('order/setMenus', menus);
+      }
+
+      this.isLoading = false
+    },
+
+    async readOrders() {
+      
+      await this.$db.collection('orders')
+        .orderBy('orderDate')
+        .limit(1)
+        .get()
+        .then(o => {
+          if(!o.empty) {
+            const data = o.docs[0].data()
+            this.orderId = o.docs[0].id
+
+            this.selUsers = data.selUsers
+            this.selItemUsers = data.selItemUsers
+            this.orderDate = data.orderDate
+          }
+        })
+
+      if(!this.orderId || this.orderDate != this.$moment().format("YYYY-MM-DD")) {
+        await this.$db.collection('orders').add( {  
+          orderDate: this.$moment().format("YYYY-MM-DD"),
+          selUsers: this.selUsers,
+          selItemUsers: this.selItemUsers,
+        })
       }
     },
-  }
+    async updateOrders() {
+      if(this.orderId) {
+          this.$db
+            .collection('orders')
+            .doc(this.orderId)
+            .update({  
+              orderDate: this.$moment().format("YYYY-MM-DD"),
+              selUsers: this.selUsers,
+              selItemUsers: this.selItemUsers,
+            })
+      }
+    },
+
+    customSort: function(items, index, isDesc) {
+      items.sort((a, b) => {
+          return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+      });
+      return items;
+    }
+  },
+}
 </script>

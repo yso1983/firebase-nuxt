@@ -249,7 +249,9 @@
           item.id = d.id
           this.desserts.push(item)
         })
-
+        
+        this.$store.commit('order/setMenus', this.desserts);
+        
         this.isLoading = false;
       },
       async update() {
