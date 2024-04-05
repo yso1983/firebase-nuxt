@@ -201,7 +201,6 @@ export default {
 
           item.cnt = cnt;
         }
-
         item.totCnt = item.cnt + item.addCnt;
       });
 

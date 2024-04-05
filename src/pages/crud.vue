@@ -77,7 +77,6 @@ export default {
       const item = Object.assign(this.form)
       item.createAt = new Date()
       const s = await this.$db.collection('boards').add(item)
-      console.log(s)
       this.dialog = false
       await this.read()
     },

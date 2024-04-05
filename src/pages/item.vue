@@ -247,11 +247,15 @@
           const r = d.data()
           const item = Object.assign(r)
           item.id = d.id
+          item.children = []
+          item.cnt = 0
+          item.addCnt = 0
+          item.totCnt = 0
           this.desserts.push(item)
         })
         
         this.$store.commit('order/setMenus', this.desserts);
-        
+
         this.isLoading = false;
       },
       async update() {
