@@ -271,6 +271,7 @@
           const r = d.data()
           const user = Object.assign(r)
           user.id = d.id
+          user.disable = false;
           this.users.push(user)
         })
 

@@ -100,6 +100,13 @@ export default {
       return this.items.find(i => i.name == this.$route.name)?.title;
     }
   },
+  mounted() {
+    this.$auth().onAuthStateChanged((user) => {
+      if (!user) {
+        this.$router.push({name: 'login'})
+      }
+    })
+  },
 }
 </script>
 

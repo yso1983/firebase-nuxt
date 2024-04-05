@@ -217,10 +217,10 @@ export default {
     },
   },
 
-  async created () {
+  created () {
     this.getUsers()
-    await this.getMenus()
-    await this.readOrders();
+    this.getMenus()
+    this.readOrders();
   },
 
   methods: {
@@ -307,6 +307,8 @@ export default {
         this.selUsers.forEach(user => {
           if(user.menu) {
             user.disable = user.menu.id != menuId;
+          } else {
+            user.disable = false;
           }
         });
         this.selClickCnt++;
