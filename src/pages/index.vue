@@ -173,6 +173,7 @@ export default {
     ],
     // menus: [],
     // users: [],
+    selMenus: [],
     selClickCnt: 1,
     selUsers: [],
     selItemUsers: {},
@@ -185,8 +186,8 @@ export default {
   computed: {
     ...mapGetters('order', ['menus', 'users']),
     items () {
-      let items = JSON.parse(JSON.stringify(this.menus));
-      items.forEach(item => {
+      //let items = JSON.parse(JSON.stringify(this.menus));
+      this.selMenus.forEach(item => {
         let userIds = this.selItemUsers[item.id];
         let cnt = 0;
         if(userIds) {
@@ -204,7 +205,7 @@ export default {
         item.totCnt = item.cnt + item.addCnt;
       });
 
-      return items.filter(i => i.cnt > 0);
+      return this.selMenus.filter(i => i.cnt > 0);
     },
   },
 
@@ -225,11 +226,12 @@ export default {
 
   methods: {
     initialize () {
+      this.getUsers()
+      this.getMenus()
       this.selUsers.forEach(user => {
         user.menu = null;
       })
       this.selItemUsers = {}
-      this.getMenus()
     },
 
     // async getUsers() {
@@ -252,6 +254,8 @@ export default {
     // },
     async getUsers() {
 
+      const lastName = '사용자';
+
       if(!this.users || this.users.length < 1) {
         
         const s = await this.$db.collection('users').get()
@@ -265,13 +269,18 @@ export default {
         })
 
         users = users.sort((a, b) => {
-            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+
+          if(a.name.indexOf(lastName) > -1 && b.name.indexOf(lastName) == -1) return 1
+          else if(a.name.indexOf(lastName) == -1 && b.name.indexOf(lastName) > -1) return -1
+
+          return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
         });
 
         this.$store.commit('order/setUsers', users)
 
-        this.selUsers = JSON.parse(JSON.stringify(users))
       }
+
+      this.selUsers = JSON.parse(JSON.stringify(this.users))
     },
 
     async changeVal(val, evt) {
@@ -283,7 +292,7 @@ export default {
         }
       });
 
-      let menu = this.menus.find(m => m.id === val)
+      let menu = this.selMenus.find(m => m.id === val) // this.menus.find(m => m.id === val)
 
       // 해당 메뉴 초기화 
       this.selUsers.forEach(user => {
@@ -332,8 +341,8 @@ export default {
     },
 
     addCnt(item, add) {
-      item.addCnt = item.addCnt + add;
-      if(item.addCnt < 0 ) item.addCnt = 0;
+      item.addCnt = item.addCnt + add
+      if(item.addCnt < 0 ) item.addCnt = 0
     },
 
     delItem(item) {
@@ -376,6 +385,8 @@ export default {
         this.$store.commit('order/setMenus', menus);
       }
 
+      this.selMenus = JSON.parse(JSON.stringify(this.menus));
+
       this.isLoading = false
     },
 
@@ -395,6 +406,12 @@ export default {
             this.orderDate = data.orderDate
           }
         })
+
+      // console.log(this.orderId)
+      // console.log(this.orderDate)
+      // console.log(this.$moment().format("YYYY-MM-DD"))
+      // console.log(!this.orderId)
+      // console.log(this.orderDate != this.$moment().format("YYYY-MM-DD"))
 
       if(!this.orderId || this.orderDate != this.$moment().format("YYYY-MM-DD")) {
         await this.$db.collection('orders').add( {  

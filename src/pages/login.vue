@@ -16,6 +16,7 @@
       v-model="form.password"
       label="password"
       type="password"
+      @keyup.enter="signIn"
     ></v-text-field>
 
     <v-btn

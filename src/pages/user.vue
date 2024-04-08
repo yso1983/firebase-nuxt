@@ -275,7 +275,7 @@
           this.users.push(user)
         })
 
-        this.$store.commit('order/setUsers', this.users);
+        this.$store.commit('order/setUsers',  this.customSort(this.users));
 
         this.isLoading = false;
       },
@@ -298,8 +298,13 @@
         await this.read()
       },
       customSort: function(items, index, isDesc) {
+        const lastName = '사용자';
         items.sort((a, b) => {
-            return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
+          
+          if(a.name.indexOf(lastName) > -1 && b.name.indexOf(lastName) == -1) return 1
+          else if(a.name.indexOf(lastName) == -1 && b.name.indexOf(lastName) > -1) return -1
+            
+          return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
         });
         return items;
       }

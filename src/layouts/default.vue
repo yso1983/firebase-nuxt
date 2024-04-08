@@ -90,6 +90,12 @@ export default {
           name: 'user',
           to: '/user',
         },
+        {
+          icon: 'mdi-login',
+          title: '로그인',
+          name: 'login',
+          to: '/login',
+        },
       ],
       miniVariant: false,
       right: true,
