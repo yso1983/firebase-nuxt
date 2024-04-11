@@ -68,7 +68,7 @@
           </span>
         </template>
         <template v-slot:append-item>
-          <div class="text-center py-2 mb-2" :style="`background-color: ${$vuetify.theme.dark ? '#424242' : '#EEEEEE'}`" @click.stop>
+          <div class="text-center py-2 mb-2" :style="`background-color: ${$vuetify.theme.dark ? '#263238' : '#F5F5F5'}`" @click.stop>
             <v-btn color="primary" @click="closeSel(`selRef${item.id}`)">
               닫기
             </v-btn>
@@ -224,6 +224,9 @@ export default {
   },
 
   created () {
+  },
+
+  mounted() {
     this.getUsers()
     this.getMenus()
     this.readOrders()
@@ -355,6 +358,8 @@ export default {
         this.selItemUsers[item.menu.id] = this.selItemUsers[item.menu.id]?.filter(e => item.id != e)
         let user = this.selUsers.find(u => u.id === item.id);
         if(user) user.menu = null;
+
+        this.updateOrders();
       }
     },
 
@@ -398,7 +403,7 @@ export default {
     async readOrders() {
       
       await this.$db.collection('orders')
-        .orderBy('orderDate')
+        .orderBy('orderDate', 'desc')
         .limit(1)
         .get()
         .then(o => {
@@ -411,7 +416,7 @@ export default {
             this.orderDate = data.orderDate
           }
         })
-
+ 
       // console.log(this.orderId)
       // console.log(this.orderDate)
       // console.log(this.$moment().format("YYYY-MM-DD"))
@@ -419,20 +424,27 @@ export default {
       // console.log(this.orderDate != this.$moment().format("YYYY-MM-DD"))
 
       if(!this.orderId || this.orderDate != this.$moment().format("YYYY-MM-DD")) {
-        await this.$db.collection('orders').add( {  
+
+        const doc_ref = await this.$db.collection('orders').add( {  
           orderDate: this.$moment().format("YYYY-MM-DD"),
           selUsers: this.selUsers,
           selItemUsers: this.selItemUsers,
         })
+
+        this.orderId = doc_ref.id;
+        this.orderDate = doc_ref.orderDate
       }
     },
     async updateOrders() {
+      // console.log("this.orderId - ", this.orderId)
       if(this.orderId) {
+        // console.log("update order")
+
           this.$db
             .collection('orders')
             .doc(this.orderId)
             .update({  
-              orderDate: this.$moment().format("YYYY-MM-DD"),
+              //orderDate: this.$moment().format("YYYY-MM-DD"),
               selUsers: this.selUsers,
               selItemUsers: this.selItemUsers,
             })
