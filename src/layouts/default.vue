@@ -41,6 +41,19 @@
       <!-- <v-btn icon @click.stop="rightDrawer = !rightDrawer">
         <v-icon>mdi-menu</v-icon>
       </v-btn> -->
+      <!-- <v-switch
+        v-model="$vuetify.theme.dark"
+        inset
+        hide-details
+        label="Theme Dark"
+      ></v-switch> -->
+      <v-switch
+        v-model="isDarkTheme"
+        inset
+        hide-details
+        label="다크모드"
+        @click.prevent="setDarkTheme"
+      ></v-switch>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -64,6 +77,8 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'DefaultLayout',
   data() {
@@ -100,9 +115,11 @@ export default {
       miniVariant: false,
       right: true,
       rightDrawer: false,
+      isDarkTheme: true,
     }
   },
   computed: {
+    ...mapGetters('global', ['isDark']),
     title() {
       return this.items.find(i => i.name == this.$route.name)?.title;
     },
@@ -116,6 +133,7 @@ export default {
         this.$router.push({name: 'login'})
       }
     })
+      
   },
   mounted() {
     this.$auth().onAuthStateChanged((user) => {
@@ -123,7 +141,14 @@ export default {
         this.$router.push({name: 'login'})
       }
     })
+    this.$vuetify.theme.dark = this.isDarkTheme = this.isDark;
   },
+  methods: {
+    setDarkTheme() {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
+      this.$store.commit('global/setDark', this.$vuetify.theme.dark);
+    }
+  }
 }
 </script>
 
@@ -131,6 +156,8 @@ export default {
   .v-text-field.v-text-field--enclosed .v-text-field__details { margin-bottom: 0px;}
   .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages { min-height: 0px;}
   .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages.theme--dark { min-height: 0px;}
+  .v-text-field.v-text-field--enclosed .v-text-field__details .v-messages.theme--light { min-height: 0px;}
+
 
   .v-data-table__mobile-row {width: 100%;}
   .v-data-table__mobile-row div:first-child { text-align: left;}
@@ -141,6 +168,7 @@ export default {
   .v-treeview-node__append .v-text-field__details { margin-bottom: 0px;}
   .v-treeview-node__append .v-text-field__details .v-messages { min-height: 0px;}
   .v-treeview-node__append .v-text-field__details .v-messages.theme--dark { min-height: 0px;}
+  .v-treeview-node__append .v-text-field__details .v-messages.theme--light { min-height: 0px;}
 
   .centered-input input {text-align: center}
 </style>

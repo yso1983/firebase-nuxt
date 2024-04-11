@@ -30,23 +30,27 @@
         @click.prevent="selClick(`${item.id}`)"
         class="my-3"
         item-disabled="disable"
+        style="font-weight: 600;"
       >
         <template v-slot:prepend-item>
-          <div class="text-center py-2" style="background-color: #263238">
-            {{item.name}}
-          </div>
+          <v-card :style="`background-color: ${$vuetify.theme.dark ? '#263238' : '#F5F5F5'}; font-weight: 800;`">
+            <v-card-actions>
+                {{item.name}}
+                <v-btn color="primary" class="ml-auto" @click.stop="closeSel(`selRef${item.id}`)" >닫기</v-btn>
+            </v-card-actions>
+          </v-card>
         </template>
         <template v-slot:item="{ parent, active, item, attrs, on }">
-          <v-list-item v-on="on" v-bind="attrs" #default="{ active }" style="background-color: #424242"  :disable="!active && !item.menu">
+          <v-list-item v-on="on" v-bind="attrs" #default="{ active }" :style="`background-color: ${$vuetify.theme.dark ? '#424242' : '#EEEEEE'}`"  :disable="!active && !item.menu">
             <v-list-item-action>
               <v-checkbox :input-value="active"></v-checkbox>
             </v-list-item-action>
             <v-list-item-content light>
               <v-list-item-title>
-                <v-row no-gutters align="center">
+                <v-row no-gutters align="center" style="font-weight: 600;">
                   <span>{{ item.name, parent.value }}</span>
                   <v-spacer></v-spacer>
-                  <v-chip text-color="white" small v-if="parent.value != item.menu?.id">{{ getMenuName(item)}}</v-chip>
+                  <v-chip :text-color="$vuetify.theme.dark ? 'white' : 'black'" small v-if="parent.value != item.menu?.id">{{ getMenuName(item)}}</v-chip>
                 </v-row>
               </v-list-item-title>
             </v-list-item-content>
@@ -64,7 +68,7 @@
           </span>
         </template>
         <template v-slot:append-item>
-          <div class="text-center py-2 mb-2" style="background-color: #424242" @click.stop>
+          <div class="text-center py-2 mb-2" :style="`background-color: ${$vuetify.theme.dark ? '#424242' : '#EEEEEE'}`" @click.stop>
             <v-btn color="primary" @click="closeSel(`selRef${item.id}`)">
               닫기
             </v-btn>
@@ -78,6 +82,7 @@
       depressed
       class="mr-2"
       @click="initialize"
+      color="brown lighten-1"
     >
       초기화
     </v-btn>

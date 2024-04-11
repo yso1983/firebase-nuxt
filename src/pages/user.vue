@@ -48,11 +48,13 @@
                     <v-text-field
                       v-model="editedUser.name"
                       label="성명"
+                      @keyup.enter="save"
                     ></v-text-field>
                   </v-col>
                   <v-col>
                      <v-radio-group
                       v-model="editedUser.gender"
+                      @keyup.enter="save"
                       row
                     >
                       <v-radio
@@ -72,15 +74,12 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn
-                color="blue darken-1"
-                text
+                color="success"
                 @click="save"
               >
                 저장
               </v-btn>
               <v-btn
-                color="blue darken-1"
-                text
                 @click="close"
               >
                 취소
@@ -93,8 +92,8 @@
             <v-card-title class="text-h5">삭제하겠습니까?</v-card-title>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">취소</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteUserConfirm">확인</v-btn>
+              <v-btn color="success" @click="deleteUserConfirm">확인</v-btn>
+              <v-btn @click="closeDelete">취소</v-btn>
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>

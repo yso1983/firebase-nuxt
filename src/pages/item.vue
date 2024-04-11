@@ -50,6 +50,7 @@
                     <v-text-field
                       v-model="editedItem.name"
                       label="메뉴명"
+                      @keyup.enter="save"
                     ></v-text-field>
                   </v-col>
                 </v-row>
@@ -59,15 +60,12 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn
-                color="blue darken-1"
-                text
+                color="blue-grey"
                 @click="save"
               >
                 저장
               </v-btn>
               <v-btn
-                color="blue darken-1"
-                text
                 @click="close"
               >
                 취소
@@ -80,8 +78,8 @@
             <v-card-title class="text-h5">삭제하겠습니까?</v-card-title>
             <v-card-actions>
               <v-spacer></v-spacer>
-              <v-btn color="blue darken-1" text @click="closeDelete">취소</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">확인</v-btn>
+              <v-btn color="blue-grey" @click="deleteItemConfirm">확인</v-btn>
+              <v-btn @click="closeDelete">취소</v-btn>
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
