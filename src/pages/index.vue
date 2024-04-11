@@ -35,8 +35,8 @@
         <template v-slot:prepend-item>
           <v-card :style="`background-color: ${$vuetify.theme.dark ? '#263238' : '#F5F5F5'}; font-weight: 800;`">
             <v-card-actions>
-                {{item.name}}
-                <v-btn color="primary" class="ml-auto" @click.stop="closeSel(`selRef${item.id}`)" >닫기</v-btn>
+                <span class='ml-3'>{{item.name}}</span>
+                <v-btn color="primary" class="ml-auto mr-2" @click.stop="closeSel(`selRef${item.id}`)" >닫기</v-btn>
             </v-card-actions>
           </v-card>
         </template>
